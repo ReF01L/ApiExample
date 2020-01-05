@@ -27,9 +27,9 @@ class Sender() {
         fun send(tables: Tables, id : Int? = null) : String {
             return try {
                 val url = if (id == null) {
-                    "https://yaht.azurewebsites.net/Home/Get/${tables.tableName}?id=all"
+                    "https://yaht.azurewebsites.net/Home/Get?name=${tables.tableName}&id=all"
                 } else {
-                    "https://yaht.azurewebsites.net/Home/Get/${tables.tableName}?id=${id}"
+                    "https://yaht.azurewebsites.net/Home/Get?name=${tables.tableName}&id=${id}"
                 }
                 URL(url).openStream().bufferedReader().use{ it.readText() }
             } catch (e : Exception) {
