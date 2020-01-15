@@ -1,6 +1,7 @@
 import com.google.gson.Gson // Докачать для парса gson, можно просто скачать либу и закинуть в папку с проетом.
 import com.google.gson.reflect.TypeToken
 import java.net.URL
+import kotlin.math.log
 
 //В бд много синтаксических косяков, править их сейчас болезненно, поэтому не обращаем внимания.
 
@@ -24,7 +25,7 @@ enum class Tables(val tableName : String) {
 
 class Sender() {
     companion object {
-        fun send(tables: Tables, id : Int? = null) : String {
+        fun getTable(tables: Tables, id : Int? = null) : String {
             return try {
                 val url = if (id == null) {
                     "https://yaht.azurewebsites.net/Home/Get?name=${tables.tableName}&id=all"
@@ -35,6 +36,23 @@ class Sender() {
             } catch (e : Exception) {
                 "[]"
             }
+        }
+
+        fun getOrders(id : Int) : ArrayList<Orders> {
+            val url = "https://yaht.azurewebsites.net/Orders/Get?customerId=${id}"
+            val json = URL(url).openStream().bufferedReader().use{ it.readText() }
+            return Gson().fromJson(json, object : TypeToken<List<Orders>>() {}.type)
+        }
+
+        fun checkAuth(login : String, password : String) : Int { // !!! Если возвращён -1 - авторизация не прошла или произошла ошибка.
+            val auth = Auth()
+            auth.username = login
+            auth.password = password
+
+            val url = "https://yaht.azurewebsites.net/Account/AppLogin?json=${Gson().toJson(auth)}"
+            val json = URL(url).openStream().bufferedReader().use{ it.readText() }
+
+            return  Gson().fromJson<Int>(json, Int::class.java)
         }
     }
 }
@@ -175,14 +193,16 @@ open class Main{
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            var json = Sender.send(Tables.accessoryId, 1) // Взятие по id.
+            var json = Sender.getTable(Tables.accessoryId, 1) // Взятие по id.
             val accessoryId = Gson().fromJson<AccessoryId>(json, AccessoryId::class.java) // Конверт в объект.
 
-            json = Sender.send(Tables.accessoryId) // Взятие всего из таблицы.
+            json = Sender.getTable(Tables.accessoryId) // Взятие всего из таблицы.
             val accessoryIdList : ArrayList<AccessoryId> = Gson().fromJson<ArrayList<AccessoryId>>(json, object : TypeToken<List<AccessoryId>>() {}.type) // Конверт в лист.
 
-            println(accessoryId)
-            println(accessoryIdList)
+            //println(accessoryId)
+            //println(accessoryIdList)
+
+            println(Sender.checkAuth("admin", "admin"))
         }
     }
 }
