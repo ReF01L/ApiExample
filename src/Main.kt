@@ -215,6 +215,12 @@ open class Main{
             //println(accessoryIdList)
 
             //println(Sender.getOrders(Sender.checkAuth("admin", "admin")))
+
+            val auth = Auth()
+            auth.username = "admin"
+            auth.password = "admin"
+            val customer = Customers()
+            println(Sender.registration(auth, customer)[0])
         }
     }
 }
