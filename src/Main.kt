@@ -1,5 +1,6 @@
 import com.google.gson.Gson // Докачать для парса gson, можно просто скачать либу и закинуть в папку с проетом.
 import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonWriter
 import java.net.URL
 import kotlin.math.log
 
@@ -53,6 +54,17 @@ class Sender() {
             val json = URL(url).openStream().bufferedReader().use{ it.readText() }
 
             return  Gson().fromJson<Int>(json, Int::class.java)
+        }
+
+        fun registration(auth: Auth, customer: Customers) : ArrayList<String> {
+            val map : MutableMap<String, Any> = mutableMapOf()
+            map["auth"] = auth
+            map["customer"] = customer
+
+            val url = "https://yaht.azurewebsites.net/Account/AppRegistration?json=${Gson().toJson(map)}"
+            val json = URL(url).openStream().bufferedReader().use{ it.readText() }
+
+            return Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
         }
     }
 }
@@ -202,7 +214,7 @@ open class Main{
             //println(accessoryId)
             //println(accessoryIdList)
 
-            println(Sender.checkAuth("admin", "admin"))
+            //println(Sender.getOrders(Sender.checkAuth("admin", "admin")))
         }
     }
 }
